@@ -11,15 +11,24 @@
     android:orientation="vertical"
     tools:context="com.delaroystudios.githubrxjava.MainActivity">
 
-    <ListView
+
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/list_view_repos"
+        android:layout_height="wrap_content"
+        android:layout_width="match_parent"
+        android:layout_weight="1"
+        tools:listitem="@layout/item_github_repo" />
+
+   <!-- <ListView
         android:id="@+id/list_view_repos"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="1"/>
+        android:layout_weight="1"/>-->
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:layout_gravity="bottom"
         android:orientation="horizontal">
 
         <EditText

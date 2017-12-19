@@ -46,7 +46,7 @@ public class GitHubRepoAdapter extends BaseAdapter {
         }
         gitHubRepos.clear();
         gitHubRepos.addAll(repos);
-        notifyDataSetChanged();
+
     }
 
     private View createView(ViewGroup parent) {

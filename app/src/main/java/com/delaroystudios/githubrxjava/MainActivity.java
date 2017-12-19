@@ -2,6 +2,8 @@ package com.delaroystudios.githubrxjava;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.View;
@@ -23,12 +25,20 @@ public class MainActivity extends AppCompatActivity {
     private GitHubRepoAdapter adapter = new GitHubRepoAdapter();
     private Subscription subscription;
 
+    GitHubRecycler recyclerAdapter = new GitHubRecycler(this);
+
+    RecyclerView recyclerView;
+
     @Override protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final ListView listView = (ListView) findViewById(R.id.list_view_repos);
-        listView.setAdapter(adapter);
+        //final ListView listView = (ListView) findViewById(R.id.list_view_repos);
+        //listView.setAdapter(adapter);
+
+        recyclerView = (RecyclerView) findViewById(R.id.list_view_repos);
+        recyclerView.setAdapter(recyclerAdapter);
+        recyclerView.setLayoutManager(new LinearLayoutManager(this));
 
         final EditText editTextUsername = (EditText) findViewById(R.id.edit_text_username);
         final Button buttonSearch = (Button) findViewById(R.id.button_search);
@@ -71,8 +81,9 @@ public class MainActivity extends AppCompatActivity {
                                        @Override
                                        public void onNext(List<GitHubRepo> gitHubRepos) {
                                            Log.d(TAG, "In onNext()");
-                                           adapter.setGitHubRepos(gitHubRepos);
+                                           recyclerAdapter.setGitHubRepos(gitHubRepos);
                                        }
                                    });
     }
+
 }
