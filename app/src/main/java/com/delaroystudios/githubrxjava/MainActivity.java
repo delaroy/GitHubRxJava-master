@@ -14,16 +14,22 @@ import android.widget.ListView;
 import com.delaroystudios.githubrxjava.R;
 
 import java.util.List;
-import rx.Observer;
-import rx.Subscription;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.schedulers.Schedulers;
+
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
+//import rx.Observer;
+//import rx.Subscription;
+//import rx.android.schedulers.AndroidSchedulers;
+//import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity {
 
     private static final String TAG = MainActivity.class.getSimpleName();
     private GitHubRepoAdapter adapter = new GitHubRepoAdapter();
-    private Subscription subscription;
+   // private Subscription subscription;
+   private Disposable disposable;
 
     GitHubRecycler recyclerAdapter = new GitHubRecycler(this);
 
@@ -55,13 +61,22 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
+        if (disposable != null && !disposable.isDisposed()) {
+            disposable.dispose();
+        }
+
+        super.onDestroy();
+    }
+
+   /* @Override
+    protected void onDestroy() {
         if (subscription != null && !subscription.isUnsubscribed()) {
             subscription.unsubscribe();
         }
         super.onDestroy();
-    }
+    }*/
 
-    private void getStarredRepos(String username) {
+   /* private void getStarredRepos(String username) {
         subscription = GitHubClient.getInstance()
                                    .getStarredRepos(username)
                                    .subscribeOn(Schedulers.io())
@@ -84,6 +99,31 @@ public class MainActivity extends AppCompatActivity {
                                            recyclerAdapter.setGitHubRepos(gitHubRepos);
                                        }
                                    });
+    }*/
+
+    private void getStarredRepos(String username) {
+
+        disposable = GitHubClient.getInstance()
+                .getStarredRepos(username)
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(
+                        new Consumer<List<GitHubRepo>>() {
+                            @Override
+                            public void accept(List<GitHubRepo> gitHubRepos) throws Exception {
+                                Log.i(TAG, "RxJava2: Response from server ...");
+                                recyclerAdapter.setGitHubRepos(gitHubRepos);
+                            }
+                        },
+                        new Consumer<Throwable>() {
+                            @Override
+                            public void accept(Throwable t) throws Exception {
+                                Log.i(TAG, "RxJava2, HTTP Error: " + t.getMessage());
+                            }
+                        }
+                );
+
+
     }
 
 }
