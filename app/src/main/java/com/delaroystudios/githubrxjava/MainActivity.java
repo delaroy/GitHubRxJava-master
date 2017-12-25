@@ -12,13 +12,19 @@ import android.widget.EditText;
 import android.widget.ListView;
 
 import com.delaroystudios.githubrxjava.R;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import java.util.List;
+import java.util.concurrent.ExecutionException;
 
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
-import io.reactivex.schedulers.Schedulers;
+//import io.reactivex.android.schedulers.AndroidSchedulers;
+//import io.reactivex.disposables.Disposable;
+//import io.reactivex.functions.Consumer;
+//import io.reactivex.schedulers.Schedulers;
+import retrofit2.Response;
+import retrofit2.Retrofit;
+import retrofit2.adapter.guava.GuavaCallAdapterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 //import rx.Observer;
 //import rx.Subscription;
 //import rx.android.schedulers.AndroidSchedulers;
@@ -29,13 +35,14 @@ public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
     private GitHubRepoAdapter adapter = new GitHubRepoAdapter();
    // private Subscription subscription;
-   private Disposable disposable;
+   //private Disposable disposable;
 
     GitHubRecycler recyclerAdapter = new GitHubRecycler(this);
 
     RecyclerView recyclerView;
 
-    @Override protected void onCreate(Bundle savedInstanceState) {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
@@ -59,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    @Override
+    /*@Override
     protected void onDestroy() {
         if (disposable != null && !disposable.isDisposed()) {
             disposable.dispose();
@@ -67,7 +74,7 @@ public class MainActivity extends AppCompatActivity {
 
         super.onDestroy();
     }
-
+*/
    /* @Override
     protected void onDestroy() {
         if (subscription != null && !subscription.isUnsubscribed()) {
@@ -101,7 +108,7 @@ public class MainActivity extends AppCompatActivity {
                                    });
     }*/
 
-    private void getStarredRepos(String username) {
+    /*private void getStarredRepos(String username) {
 
         disposable = GitHubClient.getInstance()
                 .getStarredRepos(username)
@@ -125,5 +132,29 @@ public class MainActivity extends AppCompatActivity {
 
 
     }
+*/
 
+    private void getStarredRepos(String username) {
+
+        Retrofit.Builder builder = new Retrofit.Builder()
+                .baseUrl("https://api.github.com/")
+                .addCallAdapterFactory(GuavaCallAdapterFactory.create())
+                .addConverterFactory(GsonConverterFactory.create());
+
+        Retrofit retrofit = builder.build();
+
+        GitHubService gitHubService = retrofit.create(GitHubService.class);
+
+        ListenableFuture<Response<List<GitHubRepo>>> listenableFuture = gitHubService.getStarredRepositories(username);
+
+        try {
+            Response<List<GitHubRepo>> response = listenableFuture.get();
+            List<GitHubRepo> gitHubRepos = response.body();
+            Log.i(TAG, "Guava: Response from server ...");
+
+            recyclerAdapter.setGitHubRepos(gitHubRepos);
+        } catch (InterruptedException | ExecutionException e) {
+            Log.i(TAG, "Guava, Error: " + e.getMessage());
+        }
+    }
 }
